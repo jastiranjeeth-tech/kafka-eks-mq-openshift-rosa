@@ -1,0 +1,139 @@
+{
+  "type": "record",
+  "name": "Transaction",
+  "namespace": "com.example.transaction",
+  "doc": "Schema for financial transaction events",
+  "fields": [
+    {
+      "name": "transaction_id",
+      "type": "string",
+      "doc": "Unique identifier for the transaction"
+    },
+    {
+      "name": "timestamp",
+      "type": "string",
+      "doc": "ISO 8601 timestamp of the transaction"
+    },
+    {
+      "name": "customer_id",
+      "type": "string",
+      "doc": "Customer identifier"
+    },
+    {
+      "name": "customer_name",
+      "type": "string",
+      "doc": "Customer full name"
+    },
+    {
+      "name": "customer_email",
+      "type": "string",
+      "doc": "Customer email address"
+    },
+    {
+      "name": "transaction_type",
+      "type": {
+        "type": "enum",
+        "name": "TransactionType",
+        "symbols": ["purchase", "refund", "payment", "transfer", "deposit", "withdrawal"]
+      },
+      "doc": "Type of transaction"
+    },
+    {
+      "name": "category",
+      "type": {
+        "type": "enum",
+        "name": "Category",
+        "symbols": ["electronics", "clothing", "food", "services", "utilities", "entertainment"]
+      },
+      "doc": "Transaction category"
+    },
+    {
+      "name": "amount",
+      "type": "double",
+      "doc": "Transaction amount"
+    },
+    {
+      "name": "currency",
+      "type": {
+        "type": "enum",
+        "name": "Currency",
+        "symbols": ["USD", "EUR", "GBP"]
+      },
+      "doc": "Currency code"
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "Status",
+        "symbols": ["completed", "pending", "failed", "processing"]
+      },
+      "doc": "Transaction status"
+    },
+    {
+      "name": "merchant_id",
+      "type": "string",
+      "doc": "Merchant identifier"
+    },
+    {
+      "name": "merchant_name",
+      "type": "string",
+      "doc": "Merchant name"
+    },
+    {
+      "name": "location",
+      "type": {
+        "type": "record",
+        "name": "Location",
+        "fields": [
+          {"name": "city", "type": "string"},
+          {"name": "country", "type": "string"},
+          {"name": "latitude", "type": "double"},
+          {"name": "longitude", "type": "double"}
+        ]
+      },
+      "doc": "Transaction location"
+    },
+    {
+      "name": "payment_method",
+      "type": {
+        "type": "enum",
+        "name": "PaymentMethod",
+        "symbols": ["credit_card", "debit_card", "paypal", "bank_transfer", "cash"]
+      },
+      "doc": "Payment method used"
+    },
+    {
+      "name": "device_type",
+      "type": {
+        "type": "enum",
+        "name": "DeviceType",
+        "symbols": ["mobile", "web", "pos", "atm"]
+      },
+      "doc": "Device type used for transaction"
+    },
+    {
+      "name": "ip_address",
+      "type": "string",
+      "doc": "IP address of the device"
+    },
+    {
+      "name": "user_agent",
+      "type": "string",
+      "doc": "User agent string"
+    },
+    {
+      "name": "metadata",
+      "type": {
+        "type": "record",
+        "name": "Metadata",
+        "fields": [
+          {"name": "session_id", "type": "string"},
+          {"name": "referrer", "type": "string"},
+          {"name": "campaign_id", "type": "string"}
+        ]
+      },
+      "doc": "Additional metadata"
+    }
+  ]
+}

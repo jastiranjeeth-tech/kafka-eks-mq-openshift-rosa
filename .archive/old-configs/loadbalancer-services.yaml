@@ -1,0 +1,84 @@
+# LoadBalancer Services for External Access to Confluent Platform Components
+---
+# Control Center LoadBalancer
+apiVersion: v1
+kind: Service
+metadata:
+  name: controlcenter-lb
+  namespace: confluent
+spec:
+  type: LoadBalancer
+  selector:
+    app: controlcenter
+  ports:
+    - name: http
+      port: 9021
+      targetPort: 9021
+      protocol: TCP
+---
+# Schema Registry LoadBalancer
+apiVersion: v1
+kind: Service
+metadata:
+  name: schemaregistry-lb
+  namespace: confluent
+spec:
+  type: LoadBalancer
+  selector:
+    app: schemaregistry
+  ports:
+    - name: http
+      port: 8081
+      targetPort: 8081
+      protocol: TCP
+---
+# Kafka Connect LoadBalancer
+apiVersion: v1
+kind: Service
+metadata:
+  name: connect-lb
+  namespace: confluent
+spec:
+  type: LoadBalancer
+  selector:
+    app: connect
+  ports:
+    - name: http
+      port: 8083
+      targetPort: 8083
+      protocol: TCP
+---
+# ksqlDB LoadBalancer
+apiVersion: v1
+kind: Service
+metadata:
+  name: ksqldb-lb
+  namespace: confluent
+spec:
+  type: LoadBalancer
+  selector:
+    app: ksqldb
+  ports:
+    - name: http
+      port: 8088
+      targetPort: 8088
+      protocol: TCP
+---
+# Kafka Bootstrap LoadBalancer
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-bootstrap-lb
+  namespace: confluent
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+spec:
+  type: LoadBalancer
+  selector:
+    app: kafka
+  ports:
+    - name: kafka
+      port: 9092
+      targetPort: 9092
+      protocol: TCP

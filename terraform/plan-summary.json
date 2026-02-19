@@ -1,0 +1,880 @@
+{
+  "type": "aws_cloudwatch_log_group",
+  "name": "eks_cluster",
+  "action": "create"
+}
+{
+  "type": "aws_kms_alias",
+  "name": "eks",
+  "action": "create"
+}
+{
+  "type": "aws_kms_key",
+  "name": "eks",
+  "action": "create"
+}
+{
+  "type": "aws_s3_bucket",
+  "name": "backups",
+  "action": "create"
+}
+{
+  "type": "aws_s3_bucket_lifecycle_configuration",
+  "name": "backups",
+  "action": "create"
+}
+{
+  "type": "aws_s3_bucket_server_side_encryption_configuration",
+  "name": "backups",
+  "action": "create"
+}
+{
+  "type": "aws_s3_bucket_versioning",
+  "name": "backups",
+  "action": "create"
+}
+{
+  "type": "random_password",
+  "name": "rds_password",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_log_group",
+  "name": "alb",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "http_5xx",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "request_count_high",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "target_response_time",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "unhealthy_host_count",
+  "action": "create"
+}
+{
+  "type": "aws_lb",
+  "name": "kafka_ui",
+  "action": "create"
+}
+{
+  "type": "aws_lb_listener",
+  "name": "http",
+  "action": "create"
+}
+{
+  "type": "aws_lb_listener",
+  "name": "https",
+  "action": "create"
+}
+{
+  "type": "aws_lb_listener_rule",
+  "name": "control_center",
+  "action": "create"
+}
+{
+  "type": "aws_lb_listener_rule",
+  "name": "kafka_connect",
+  "action": "create"
+}
+{
+  "type": "aws_lb_listener_rule",
+  "name": "ksqldb",
+  "action": "create"
+}
+{
+  "type": "aws_lb_listener_rule",
+  "name": "schema_registry",
+  "action": "create"
+}
+{
+  "type": "aws_lb_target_group",
+  "name": "control_center",
+  "action": "create"
+}
+{
+  "type": "aws_lb_target_group",
+  "name": "kafka_connect",
+  "action": "create"
+}
+{
+  "type": "aws_lb_target_group",
+  "name": "ksqldb",
+  "action": "create"
+}
+{
+  "type": "aws_lb_target_group",
+  "name": "schema_registry",
+  "action": "create"
+}
+{
+  "type": "aws_security_group",
+  "name": "alb",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "alb_egress_all",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "alb_ingress_http",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "alb_ingress_https",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "eks_node_allow_control_center",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "eks_node_allow_kafka_connect",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "eks_node_allow_ksqldb",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "eks_node_allow_schema_registry",
+  "action": "create"
+}
+{
+  "type": "aws_caller_identity",
+  "name": "current",
+  "action": "read"
+}
+{
+  "type": "aws_iam_policy_document",
+  "name": "aws_load_balancer_controller_assume_role",
+  "action": "read"
+}
+{
+  "type": "aws_iam_policy_document",
+  "name": "cluster_assume_role",
+  "action": "read"
+}
+{
+  "type": "aws_iam_policy_document",
+  "name": "cluster_autoscaler_assume_role",
+  "action": "read"
+}
+{
+  "type": "aws_iam_policy_document",
+  "name": "ebs_csi_driver_assume_role",
+  "action": "read"
+}
+{
+  "type": "aws_iam_policy_document",
+  "name": "node_assume_role",
+  "action": "read"
+}
+{
+  "type": "aws_iam_policy_document",
+  "name": "vpc_cni_assume_role",
+  "action": "read"
+}
+{
+  "type": "aws_region",
+  "name": "current",
+  "action": "read"
+}
+{
+  "type": "tls_certificate",
+  "name": "cluster",
+  "action": "read"
+}
+{
+  "type": "aws_cloudwatch_log_group",
+  "name": "cluster",
+  "action": "create"
+}
+{
+  "type": "aws_eks_addon",
+  "name": "coredns",
+  "action": "create"
+}
+{
+  "type": "aws_eks_addon",
+  "name": "ebs_csi_driver",
+  "action": "create"
+}
+{
+  "type": "aws_eks_addon",
+  "name": "kube_proxy",
+  "action": "create"
+}
+{
+  "type": "aws_eks_addon",
+  "name": "vpc_cni",
+  "action": "create"
+}
+{
+  "type": "aws_eks_cluster",
+  "name": "main",
+  "action": "create"
+}
+{
+  "type": "aws_eks_node_group",
+  "name": "main",
+  "action": "create"
+}
+{
+  "type": "aws_iam_openid_connect_provider",
+  "name": "cluster",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role",
+  "name": "aws_load_balancer_controller",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role",
+  "name": "cluster",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role",
+  "name": "cluster_autoscaler",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role",
+  "name": "ebs_csi_driver",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role",
+  "name": "node_group",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role",
+  "name": "vpc_cni",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role_policy",
+  "name": "aws_load_balancer_controller",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role_policy",
+  "name": "cluster_autoscaler",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role_policy",
+  "name": "ebs_csi_driver",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role_policy",
+  "name": "node_group_additional",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role_policy_attachment",
+  "name": "cluster_AmazonEKSClusterPolicy",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role_policy_attachment",
+  "name": "cluster_AmazonEKSVPCResourceController",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role_policy_attachment",
+  "name": "node_group_AmazonEC2ContainerRegistryReadOnly",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role_policy_attachment",
+  "name": "node_group_AmazonEKSWorkerNodePolicy",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role_policy_attachment",
+  "name": "node_group_AmazonEKS_CNI_Policy",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role_policy_attachment",
+  "name": "node_group_AmazonSSMManagedInstanceCore",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role_policy_attachment",
+  "name": "vpc_cni",
+  "action": "create"
+}
+{
+  "type": "aws_launch_template",
+  "name": "node_group",
+  "action": "create"
+}
+{
+  "type": "aws_security_group",
+  "name": "cluster",
+  "action": "create"
+}
+{
+  "type": "aws_security_group",
+  "name": "node_group",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "cluster_egress_nodes_https",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "cluster_egress_nodes_kubelet",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "cluster_egress_nodes_webhooks",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "cluster_ingress_nodes_https",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "node_group_egress_internet",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "node_group_ingress_cluster_https",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "node_group_ingress_cluster_kubelet",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "node_group_ingress_cluster_webhooks",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "node_group_ingress_self",
+  "action": "create"
+}
+{
+  "type": "aws_caller_identity",
+  "name": "current",
+  "action": "read"
+}
+{
+  "type": "aws_region",
+  "name": "current",
+  "action": "read"
+}
+{
+  "type": "aws_cloudwatch_log_group",
+  "name": "redis_engine_log",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_log_group",
+  "name": "redis_slow_log",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "cache_hit_rate",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "cpu_utilization",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "database_memory_usage",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "evictions",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "swap_usage",
+  "action": "create"
+}
+{
+  "type": "aws_elasticache_parameter_group",
+  "name": "main",
+  "action": "create"
+}
+{
+  "type": "aws_elasticache_replication_group",
+  "name": "main",
+  "action": "create"
+}
+{
+  "type": "aws_elasticache_subnet_group",
+  "name": "main",
+  "action": "create"
+}
+{
+  "type": "aws_security_group",
+  "name": "main",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_log_group",
+  "name": "nlb",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "active_flow_count_low",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "new_flow_count_high",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "processed_bytes_low",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "target_response_time",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "target_response_time",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "target_response_time",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "unhealthy_host_count",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "unhealthy_host_count",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "unhealthy_host_count",
+  "action": "create"
+}
+{
+  "type": "aws_lb",
+  "name": "kafka",
+  "action": "create"
+}
+{
+  "type": "aws_lb_listener",
+  "name": "kafka_broker",
+  "action": "create"
+}
+{
+  "type": "aws_lb_listener",
+  "name": "kafka_broker",
+  "action": "create"
+}
+{
+  "type": "aws_lb_listener",
+  "name": "kafka_broker",
+  "action": "create"
+}
+{
+  "type": "aws_lb_target_group",
+  "name": "kafka_broker",
+  "action": "create"
+}
+{
+  "type": "aws_lb_target_group",
+  "name": "kafka_broker",
+  "action": "create"
+}
+{
+  "type": "aws_lb_target_group",
+  "name": "kafka_broker",
+  "action": "create"
+}
+{
+  "type": "aws_security_group_rule",
+  "name": "eks_node_allow_kafka_nodeport",
+  "action": "create"
+}
+{
+  "type": "aws_caller_identity",
+  "name": "current",
+  "action": "read"
+}
+{
+  "type": "aws_iam_policy_document",
+  "name": "rds_monitoring_assume_role",
+  "action": "read"
+}
+{
+  "type": "aws_region",
+  "name": "current",
+  "action": "read"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "cpu_utilization",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "database_connections",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "free_storage_space",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "read_latency",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "write_latency",
+  "action": "create"
+}
+{
+  "type": "aws_db_instance",
+  "name": "main",
+  "action": "create"
+}
+{
+  "type": "aws_db_parameter_group",
+  "name": "main",
+  "action": "create"
+}
+{
+  "type": "aws_db_subnet_group",
+  "name": "main",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role",
+  "name": "rds_monitoring",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role_policy_attachment",
+  "name": "rds_monitoring",
+  "action": "create"
+}
+{
+  "type": "aws_security_group",
+  "name": "main",
+  "action": "create"
+}
+{
+  "type": "aws_caller_identity",
+  "name": "current",
+  "action": "read"
+}
+{
+  "type": "aws_iam_policy_document",
+  "name": "secrets_read_policy",
+  "action": "read"
+}
+{
+  "type": "aws_kms_key",
+  "name": "secrets",
+  "action": "read"
+}
+{
+  "type": "aws_region",
+  "name": "current",
+  "action": "read"
+}
+{
+  "type": "aws_cloudwatch_log_metric_filter",
+  "name": "unauthorized_secret_access",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_metric_alarm",
+  "name": "unauthorized_secret_access",
+  "action": "create"
+}
+{
+  "type": "aws_iam_policy",
+  "name": "secrets_read_policy",
+  "action": "create"
+}
+{
+  "type": "aws_secretsmanager_secret",
+  "name": "elasticache_auth",
+  "action": "create"
+}
+{
+  "type": "aws_secretsmanager_secret",
+  "name": "kafka_connect",
+  "action": "create"
+}
+{
+  "type": "aws_secretsmanager_secret",
+  "name": "ksqldb",
+  "action": "create"
+}
+{
+  "type": "aws_secretsmanager_secret",
+  "name": "rds_master",
+  "action": "create"
+}
+{
+  "type": "aws_secretsmanager_secret",
+  "name": "schema_registry",
+  "action": "create"
+}
+{
+  "type": "aws_secretsmanager_secret_version",
+  "name": "elasticache_auth",
+  "action": "create"
+}
+{
+  "type": "aws_secretsmanager_secret_version",
+  "name": "kafka_connect",
+  "action": "create"
+}
+{
+  "type": "aws_secretsmanager_secret_version",
+  "name": "ksqldb",
+  "action": "create"
+}
+{
+  "type": "aws_secretsmanager_secret_version",
+  "name": "rds_master",
+  "action": "create"
+}
+{
+  "type": "aws_secretsmanager_secret_version",
+  "name": "schema_registry",
+  "action": "create"
+}
+{
+  "type": "random_password",
+  "name": "connect_api_key",
+  "action": "create"
+}
+{
+  "type": "random_password",
+  "name": "ksqldb_api_key",
+  "action": "create"
+}
+{
+  "type": "random_password",
+  "name": "schema_registry_api_key",
+  "action": "create"
+}
+{
+  "type": "aws_cloudwatch_log_group",
+  "name": "flow_logs",
+  "action": "create"
+}
+{
+  "type": "aws_eip",
+  "name": "nat",
+  "action": "create"
+}
+{
+  "type": "aws_flow_log",
+  "name": "main",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role",
+  "name": "flow_logs",
+  "action": "create"
+}
+{
+  "type": "aws_iam_role_policy",
+  "name": "flow_logs",
+  "action": "create"
+}
+{
+  "type": "aws_internet_gateway",
+  "name": "main",
+  "action": "create"
+}
+{
+  "type": "aws_nat_gateway",
+  "name": "main",
+  "action": "create"
+}
+{
+  "type": "aws_route",
+  "name": "private_nat_gateway",
+  "action": "create"
+}
+{
+  "type": "aws_route",
+  "name": "private_nat_gateway",
+  "action": "create"
+}
+{
+  "type": "aws_route",
+  "name": "private_nat_gateway",
+  "action": "create"
+}
+{
+  "type": "aws_route",
+  "name": "public_internet_gateway",
+  "action": "create"
+}
+{
+  "type": "aws_route_table",
+  "name": "private",
+  "action": "create"
+}
+{
+  "type": "aws_route_table",
+  "name": "private",
+  "action": "create"
+}
+{
+  "type": "aws_route_table",
+  "name": "private",
+  "action": "create"
+}
+{
+  "type": "aws_route_table",
+  "name": "public",
+  "action": "create"
+}
+{
+  "type": "aws_route_table_association",
+  "name": "private",
+  "action": "create"
+}
+{
+  "type": "aws_route_table_association",
+  "name": "private",
+  "action": "create"
+}
+{
+  "type": "aws_route_table_association",
+  "name": "private",
+  "action": "create"
+}
+{
+  "type": "aws_route_table_association",
+  "name": "public",
+  "action": "create"
+}
+{
+  "type": "aws_route_table_association",
+  "name": "public",
+  "action": "create"
+}
+{
+  "type": "aws_route_table_association",
+  "name": "public",
+  "action": "create"
+}
+{
+  "type": "aws_security_group",
+  "name": "vpc_endpoints",
+  "action": "create"
+}
+{
+  "type": "aws_subnet",
+  "name": "private",
+  "action": "create"
+}
+{
+  "type": "aws_subnet",
+  "name": "private",
+  "action": "create"
+}
+{
+  "type": "aws_subnet",
+  "name": "private",
+  "action": "create"
+}
+{
+  "type": "aws_subnet",
+  "name": "public",
+  "action": "create"
+}
+{
+  "type": "aws_subnet",
+  "name": "public",
+  "action": "create"
+}
+{
+  "type": "aws_subnet",
+  "name": "public",
+  "action": "create"
+}
+{
+  "type": "aws_vpc",
+  "name": "main",
+  "action": "create"
+}
+{
+  "type": "aws_vpc_endpoint",
+  "name": "ecr_api",
+  "action": "create"
+}
+{
+  "type": "aws_vpc_endpoint",
+  "name": "ecr_dkr",
+  "action": "create"
+}
+{
+  "type": "aws_vpc_endpoint",
+  "name": "logs",
+  "action": "create"
+}
+{
+  "type": "aws_vpc_endpoint",
+  "name": "s3",
+  "action": "create"
+}

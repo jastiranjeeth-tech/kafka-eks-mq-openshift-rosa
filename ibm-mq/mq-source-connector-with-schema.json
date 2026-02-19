@@ -1,0 +1,36 @@
+{
+  "name": "ibm-mq-source-connector-with-schema",
+  "config": {
+    "connector.class": "com.ibm.eventstreams.connect.mqsource.MQSourceConnector",
+    "tasks.max": "1",
+    
+    "mq.queue.manager": "QM1",
+    "mq.connection.name.list": "aa79f12bf8f6c49bbb9b4d803136a8d2-1985455d131cd38c.elb.us-east-1.amazonaws.com(1414)",
+    "mq.channel.name": "DEV.APP.SVRCONN",
+    "mq.queue": "KAFKA.IN",
+    "mq.user.name": "app",
+    "mq.password": "passw0rd",
+    "mq.user.authentication.mqcsp": "true",
+    
+    "topic": "mq-messages-in",
+    
+    "mq.record.builder": "com.ibm.eventstreams.connect.mqsource.builders.DefaultRecordBuilder",
+    "mq.message.body.jms": "true",
+    
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "value.converter.schema.registry.url": "http://schemaregistry.confluent.svc.cluster.local:8081",
+    "value.converter.schemas.enable": "true",
+    
+    "mq.batch.size": "100",
+    "mq.connection.mode": "client",
+    
+    "errors.tolerance": "all",
+    "errors.log.enable": "true",
+    "errors.log.include.messages": "true",
+    
+    "transforms": "jsonToAvro",
+    "transforms.jsonToAvro.type": "org.apache.kafka.connect.transforms.HoistField$Value",
+    "transforms.jsonToAvro.field": "payload"
+  }
+}

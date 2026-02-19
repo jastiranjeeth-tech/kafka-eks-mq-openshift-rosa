@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mq-data-producer
+  namespace: mq-kafka-integration
+  labels:
+    app: mq-data-producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mq-data-producer
+  template:
+    metadata:
+      labels:
+        app: mq-data-producer
+    spec:
+      containers:
+      - name: producer
+        image: quay.io/<your-username>/mq-data-producer:latest
+        env:
+        - name: MQ_HOST
+          value: "ibm-mq.mq-kafka-integration.svc.cluster.local"
+        - name: MQ_PORT
+          value: "1414"
+        - name: MQ_QUEUE_MANAGER
+          value: "QM1"
+        - name: MQ_CHANNEL
+          value: "DEV.APP.SVRCONN"
+        - name: MQ_QUEUE
+          value: "KAFKA.IN"
+        - name: MQ_USER
+          value: "app"
+        - name: MQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ibm-mq-admin
+              key: app-password
+        - name: MESSAGE_INTERVAL
+          value: "5"  # Send message every 5 seconds
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"

@@ -1,0 +1,26 @@
+# Custom Kafka Connect image with IBM MQ connector
+FROM confluentinc/cp-server-connect:7.6.0
+
+USER root
+
+# Download IBM MQ connector
+RUN mkdir -p /usr/share/java/kafka-connect-mq-source && \
+    cd /tmp && \
+    curl -L -o kafka-connect-mq-source.jar \
+    https://github.com/ibm-messaging/kafka-connect-mq-source/releases/download/v2.2.0/kafka-connect-mq-source-2.2.0-jar-with-dependencies.jar && \
+    mv kafka-connect-mq-source.jar /usr/share/java/kafka-connect-mq-source/
+
+RUN mkdir -p /usr/share/java/kafka-connect-mq-sink && \
+    cd /tmp && \
+    curl -L -o kafka-connect-mq-sink.jar \
+    https://github.com/ibm-messaging/kafka-connect-mq-sink/releases/download/v2.2.0/kafka-connect-mq-sink-2.2.0-jar-with-dependencies.jar && \
+    mv kafka-connect-mq-sink.jar /usr/share/java/kafka-connect-mq-sink/
+
+# Add IBM MQ Java libraries (optional, may already be in connector JAR)
+# RUN cd /tmp && \
+#     curl -O https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/redist/9.3.0.0-IBM-MQ-Install-Java-All.jar && \
+#     java -jar IBM-MQ-Install-Java-All.jar --acceptLicense /usr/share/java/kafka-connect-mq/
+
+USER appuser
+
+# The Confluent Platform will automatically discover connectors in /usr/share/java/

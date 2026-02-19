@@ -1,0 +1,33 @@
+{
+  "name": "ibm-mq-sink-connector",
+  "config": {
+    "connector.class": "com.ibm.eventstreams.connect.mqsink.MQSinkConnector",
+    "tasks.max": "1",
+    
+    "topics": "kafka-to-mq",
+    
+    "mq.queue.manager": "QM1",
+    "mq.connection.name.list": "aa79f12bf8f6c49bbb9b4d803136a8d2-1985455d131cd38c.elb.us-east-1.amazonaws.com(1414)",
+    "mq.channel.name": "DEV.APP.SVRCONN",
+    "mq.queue": "KAFKA.OUT",
+    "mq.user.name": "app",
+    "mq.password": "passw0rd",
+    "mq.user.authentication.mqcsp": "true",
+    
+    "mq.message.builder": "com.ibm.eventstreams.connect.mqsink.builders.DefaultMessageBuilder",
+    "mq.message.body.jms": "true",
+    "mq.time.to.live": "0",
+    "mq.persistent": "true",
+    
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.converters.ByteArrayConverter",
+    
+    "mq.message.builder.key.header": "JMSCorrelationID",
+    
+    "mq.connection.mode": "client",
+    
+    "errors.tolerance": "all",
+    "errors.log.enable": "true",
+    "errors.log.include.messages": "true"
+  }
+}

@@ -1,0 +1,143 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ibm-mq-admin
+  namespace: mq-kafka-integration
+type: Opaque
+stringData:
+  admin-password: passw0rd
+  app-password: passw0rd
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ibm-mq-config
+  namespace: mq-kafka-integration
+data:
+  mq.mqsc: |
+    DEFINE QLOCAL(KAFKA.IN) REPLACE DEFPSIST(YES) MAXDEPTH(5000)
+    DEFINE QLOCAL(KAFKA.OUT) REPLACE DEFPSIST(YES) MAXDEPTH(5000)
+    DEFINE QLOCAL(DEV.QUEUE.1) REPLACE DEFPSIST(YES) MAXDEPTH(5000)
+    DEFINE QLOCAL(DEV.DEAD.LETTER.QUEUE) REPLACE DEFPSIST(YES) MAXDEPTH(5000)
+    ALTER QMGR DEADQ(DEV.DEAD.LETTER.QUEUE)
+    DEFINE CHANNEL(DEV.ADMIN.SVRCONN) CHLTYPE(SVRCONN) REPLACE
+    DEFINE CHANNEL(DEV.APP.SVRCONN) CHLTYPE(SVRCONN) REPLACE MCAUSER('app')
+    ALTER AUTHINFO(SYSTEM.DEFAULT.AUTHINFO.IDPWOS) AUTHTYPE(IDPWOS) CHCKCLNT(OPTIONAL)
+    REFRESH SECURITY TYPE(CONNAUTH)
+    SET CHLAUTH(DEV.ADMIN.SVRCONN) TYPE(BLOCKUSER) USERLIST('nobody') DESCR('Allow all access')
+    SET CHLAUTH(DEV.APP.SVRCONN) TYPE(BLOCKUSER) USERLIST('nobody') DESCR('Allow all access')
+    SET AUTHREC OBJTYPE(QMGR) PRINCIPAL('app') AUTHADD(CONNECT,INQ)
+    SET AUTHREC PROFILE('KAFKA.**') OBJTYPE(QUEUE) PRINCIPAL('app') AUTHADD(ALLMQI)
+    SET AUTHREC PROFILE('DEV.**') OBJTYPE(QUEUE) PRINCIPAL('app') AUTHADD(ALLMQI)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibm-mq
+  namespace: mq-kafka-integration
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ibm-mq
+  template:
+    metadata:
+      labels:
+        app: ibm-mq
+    spec:
+      containers:
+      - name: mq
+        image: icr.io/ibm-messaging/mq:latest
+        ports:
+        - containerPort: 1414
+          name: qmgr
+        - containerPort: 9443
+          name: console
+        env:
+        - name: LICENSE
+          value: "accept"
+        - name: MQ_QMGR_NAME
+          value: "QM1"
+        - name: MQ_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ibm-mq-admin
+              key: admin-password
+        - name: MQ_APP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ibm-mq-admin
+              key: app-password
+        - name: MQ_ENABLE_METRICS
+          value: "true"
+        volumeMounts:
+        - name: mqsc-config
+          mountPath: /etc/mqm/mq.mqsc
+          subPath: mq.mqsc
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+        livenessProbe:
+          tcpSocket:
+            port: 1414
+          initialDelaySeconds: 90
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          tcpSocket:
+            port: 1414
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: mqsc-config
+        configMap:
+          name: ibm-mq-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ibm-mq
+  namespace: mq-kafka-integration
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+spec:
+  type: LoadBalancer
+  selector:
+    app: ibm-mq
+  ports:
+  - name: qmgr
+    port: 1414
+    targetPort: 1414
+    protocol: TCP
+  - name: console
+    port: 9443
+    targetPort: 9443
+    protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ibm-mq-internal
+  namespace: mq-kafka-integration
+spec:
+  type: ClusterIP
+  selector:
+    app: ibm-mq
+  ports:
+  - name: qmgr
+    port: 1414
+    targetPort: 1414
+    protocol: TCP
+  - name: console
+    port: 9443
+    targetPort: 9443
+    protocol: TCP
