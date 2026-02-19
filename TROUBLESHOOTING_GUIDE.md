@@ -1136,12 +1136,18 @@ aws eks describe-nodegroup \
 
 **Expected Timeline**:
 - EKS Node Group: 2-5 minutes
-- RDS Database: 3-8 minutes
+- RDS Database: 1-3 minutes (actual: 1m1s)
 - ElastiCache: 2-5 minutes
-- EKS Cluster: 5-10 minutes
-- VPC & Networking: 2-3 minutes
+- EKS Cluster: 3-5 minutes (actual: 3m52s)
+- VPC Subnets: 30-33 minutes (ENI detachment delays)
+- Internet Gateway & VPC: 1-2 minutes
 
-**Total**: ~15-30 minutes for complete infrastructure teardown
+**Total**: ~35-45 minutes for complete infrastructure teardown
+
+**Actual Observed Times**:
+- Phase 1: EKS cluster + RDS + most resources: ~10 minutes
+- Phase 2: ElastiCache (after snapshot issue resolved) + VPC teardown: ~33 minutes
+- **Total**: ~43 minutes with snapshot issue, ~40 minutes without interruptions
 
 ---
 
@@ -1154,19 +1160,108 @@ aws eks describe-nodegroup \
 Error: deleting ElastiCache Replication Group (kafka-platform-dev-ksqldb-redis): 
 operation error ElastiCache: DeleteReplicationGroup, 
 SnapshotAlreadyExistsFault: Snapshot with specified name already exists.
+RequestID: 701c85d3-7aef-489f-bc84-a8acbcd0c343
 ```
 
 **Debugging Commands**:
 ```bash
 # List existing snapshots
 aws elasticache describe-snapshots \
-  --query 'Snapshots[?contains(SnapshotName, `kafka-platform-dev`)].[SnapshotName,SnapshotStatus]'
+  --query 'Snapshots[?contains(SnapshotName, `kafka-platform-dev`)].[SnapshotName,SnapshotStatus]' \
+  --output table
+
+# Found: kafka-platform-dev-ksqldb-redis-final-snapshot | available
 
 # Delete old snapshot
 aws elasticache delete-snapshot --snapshot-name kafka-platform-dev-ksqldb-redis-final-snapshot
 ```
 
-**Solution**: Delete existing snapshot before retry, or modify terraform to skip snapshot creation on destroy.
+**Solution**: 
+1. Delete existing snapshot manually in AWS Console or using AWS CLI
+2. Resume terraform destroy - ElastiCache will create new final snapshot
+3. Alternative: Modify terraform to skip snapshot creation on destroy with `final_snapshot_identifier = null`
+
+**Resolution Time**: After snapshot deletion, ElastiCache + VPC cleanup takes ~30-33 minutes total.
+
+---
+
+### Issue 10.4: VPC Subnet Deletion Takes 30+ Minutes
+
+**Problem**: During final terraform destroy phase, public subnets take extremely long to delete (~32 minutes).
+
+**Root Cause**: Elastic Network Interfaces (ENIs) from deleted services take time to fully detach.
+
+**Debugging Commands**:
+```bash
+# Check ENIs still attached to subnet
+aws ec2 describe-network-interfaces \
+  --filters "Name=subnet-id,Values=subnet-0dab145ff54e2e52b" \
+  --query 'NetworkInterfaces[*].[NetworkInterfaceId,Status,Description]' \
+  --output table
+
+# Check subnet dependencies
+aws ec2 describe-subnets --subnet-ids subnet-0dab145ff54e2e52b \
+  --query 'Subnets[0].{AvailableIpAddressCount:AvailableIpAddressCount,State:State}'
+```
+
+**Expected Behavior**: 
+- AWS automatically waits for ENI detachment before deleting subnets
+- Internet Gateway deletion waits for all subnets to be destroyed
+- VPC deletion is final step after all dependencies removed
+- No manual intervention required - just patience!
+
+**Timeline**:
+- subnet-047ebef01f58a77e9: 31m59s
+- subnet-021e5c09df3b6c598: 32m30s  
+- subnet-0dab145ff54e2e52b: 32m40s
+- Internet Gateway: 32m40s
+- VPC: 1m19s (after gateway deletion)
+
+---
+
+### Issue 10.5: Successful Teardown Completion
+
+**Status**: ✅ **COMPLETE - All infrastructure destroyed successfully**
+
+**Final Results**:
+```
+Destroy complete! Resources: 39 destroyed.
+The state file is empty. No resources are represented.
+```
+
+**Verification**:
+```bash
+# No EKS clusters
+aws eks list-clusters --query 'clusters[?contains(@, `kafka-platform`)]'
+# Output: []
+
+# No VPCs with kafka tags
+aws ec2 describe-vpcs --filters "Name=tag:Project,Values=kafka-learning" \
+  --query 'Vpcs[*].[VpcId,Tags[?Key==`Name`].Value|[0]]'
+# Output: empty
+
+# No RDS instances
+aws rds describe-db-instances \
+  --query 'DBInstances[?contains(DBInstanceIdentifier, `kafka`)].[DBInstanceIdentifier,DBInstanceStatus]'
+# Output: empty
+
+# No ElastiCache clusters
+aws elasticache describe-replication-groups \
+  --query 'ReplicationGroups[?contains(ReplicationGroupId, `kafka`)].[ReplicationGroupId,Status]'
+# Output: empty
+```
+
+**Total Destruction Time**: ~43 minutes (with snapshot issue resolution)
+- Resources destroyed: 115+ (all terraform-managed infrastructure)
+- State lock unlocks required: 3 (due to user interruptions)
+- Issues encountered: ElastiCache snapshot conflict (resolved by manual deletion)
+
+**Lessons Learned**:
+1. Always check for existing snapshots before destroying ElastiCache
+2. VPC subnet deletion can take 30+ minutes due to ENI detachment
+3. Don't interrupt terraform destroy - let it complete or use Ctrl+C only when necessary
+4. Force-unlock state only after confirming no terraform process is running
+5. Total teardown time: budget 40-45 minutes for complete infrastructure removal
 
 ---
 
