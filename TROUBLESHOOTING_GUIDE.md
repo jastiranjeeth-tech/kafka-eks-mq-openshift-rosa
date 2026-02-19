@@ -17,6 +17,8 @@
 7. [MQ Connector Issues](#7-mq-connector-issues)
 8. [Network Connectivity Issues](#8-network-connectivity-issues)
 9. [Quick Debug Commands Reference](#9-quick-debug-commands-reference)
+10. [Cluster Teardown Issues](#10-cluster-teardown-issues)
+11. [ROSA Cluster Deletion](#11-rosa-cluster-deletion)
 
 ---
 
@@ -63,31 +65,56 @@ resource "aws_cloudwatch_log_group" "eks" {
 
 ### Issue 1.2: Terraform State Lock Issues
 
-**Problem**: Terraform apply fails with state lock timeout.
+**Problem**: Terraform apply or destroy fails with state lock error after interrupted operation.
 
 **Error**:
 ```
 Error: Error acquiring the state lock
+
+Error message: operation error DynamoDB: PutItem, https response error
+StatusCode: 400, RequestID: 4O5GAVR9R7HJ4OHENFP8CO5O3JVV4KQNSO5AEMVJF66Q9ASUAAJG,
+ConditionalCheckFailedException: The conditional request failed
+
 Lock Info:
-  ID:        xxxxx-xxxx-xxxx
+  ID:        ac852261-d519-3e23-9c27-178271bbd576
+  Path:      kafka-terraform-state-831488932214/kafka-eks/terraform.tfstate
   Operation: OperationTypeApply
+  Who:       ranjeethjasti@Ranjeeths-MacBook-Air.local
+  Version:   1.14.3
+  Created:   2026-02-19 18:26:57.818913 +0000 UTC
 ```
+
+**Root Cause**: Previous terraform operation was interrupted (Ctrl+C), leaving the state locked in DynamoDB.
 
 **Debugging Commands**:
 ```bash
 # Check DynamoDB lock table
 aws dynamodb scan --table-name kafka-platform-terraform-lock
 
-# Force unlock (use with caution)
-terraform force-unlock <LOCK_ID>
-
 # Check who's holding the lock
 aws dynamodb get-item \
   --table-name kafka-platform-terraform-lock \
   --key '{"LockID": {"S": "kafka-platform-dev/terraform.tfstate"}}'
+
+# Verify no other terraform process is running
+ps aux | grep terraform
+
+# Force unlock (use LOCK_ID from error message)
+terraform force-unlock -force ac852261-d519-3e23-9c27-178271bbd576
 ```
 
-**Solution**: Wait for lock to release or force-unlock if process died.
+**Solution**: Force-unlock the state after confirming no other terraform process is running.
+
+```bash
+cd terraform/
+terraform force-unlock -force <LOCK_ID>
+# Output: Terraform state has been successfully unlocked!
+
+# Retry your terraform command
+terraform destroy -var-file=dev.tfvars -auto-approve
+```
+
+**⚠️ Important**: Only force-unlock if you're certain no other terraform process is actively using the state.
 
 ---
 
@@ -1033,6 +1060,148 @@ done
 - [AWS EKS Troubleshooting](https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html)
 - [IBM MQ Documentation](https://www.ibm.com/docs/en/ibm-mq)
 - [Kafka Connect Documentation](https://docs.confluent.io/platform/current/connect/index.html)
+
+---
+
+## 10. Cluster Teardown Issues
+
+### Issue 10.1: Terraform Destroy Interrupted State Lock
+
+**Problem**: Running `terraform destroy`, hitting Ctrl+C to cancel, then trying to destroy again results in state lock error.
+
+**Error**:
+```
+Error: Error acquiring the state lock
+
+Error message: operation error DynamoDB: PutItem, https response error
+StatusCode: 400, RequestID: 4O5GAVR9R7HJ4OHENFP8CO5O3JVV4KQNSO5AEMVJF66Q9ASUAAJG,
+ConditionalCheckFailedException: The conditional request failed
+Lock Info:
+  ID:        ac852261-d519-3e23-9c27-178271bbd576
+  Path:      kafka-terraform-state-831488932214/kafka-eks/terraform.tfstate
+  Operation: OperationTypeApply
+```
+
+**Root Cause**: Interrupted terraform operation leaves state locked.
+
+**Debugging Commands**:
+```bash
+# Verify no terraform process is running
+ps aux | grep terraform
+
+# Check the lock in DynamoDB
+aws dynamodb get-item \
+  --table-name kafka-platform-terraform-lock \
+  --key '{"LockID": {"S": "kafka-platform-dev/terraform.tfstate"}}' \
+  --query 'Item.Info.S' \
+  --output text | jq '.'
+```
+
+**Solution**:
+```bash
+cd terraform/
+
+# Force unlock using the Lock ID from error message
+terraform force-unlock -force ac852261-d519-3e23-9c27-178271bbd576
+# Output: Terraform state has been successfully unlocked!
+
+# Retry destroy
+terraform destroy -var-file=dev.tfvars -auto-approve
+```
+
+---
+
+### Issue 10.2: RDS/ElastiCache Deletion Timeout
+
+**Problem**: During `terraform destroy`, RDS and ElastiCache resources take very long to delete (10+ minutes).
+
+**Debugging Commands**:
+```bash
+# Check RDS deletion progress
+aws rds describe-db-instances \
+  --db-instance-identifier kafka-platform-dev-schemaregistry \
+  --query 'DBInstances[0].[DBInstanceStatus,DeletionProtection]'
+
+# Check ElastiCache deletion progress
+aws elasticache describe-replication-groups \
+  --replication-group-id kafka-platform-dev-ksqldb-redis \
+  --query 'ReplicationGroups[0].Status'
+
+# Monitor EKS node group deletion
+aws eks describe-nodegroup \
+  --cluster-name kafka-platform-dev-cluster \
+  --nodegroup-name kafka-platform-dev-cluster-node-group \
+  --query 'nodegroup.status'
+```
+
+**Expected Timeline**:
+- EKS Node Group: 2-5 minutes
+- RDS Database: 3-8 minutes
+- ElastiCache: 2-5 minutes
+- EKS Cluster: 5-10 minutes
+- VPC & Networking: 2-3 minutes
+
+**Total**: ~15-30 minutes for complete infrastructure teardown
+
+---
+
+### Issue 10.3: Snapshot Already Exists Error
+
+**Problem**: ElastiCache deletion fails with snapshot already exists error.
+
+**Error**:
+```
+Error: deleting ElastiCache Replication Group (kafka-platform-dev-ksqldb-redis): 
+operation error ElastiCache: DeleteReplicationGroup, 
+SnapshotAlreadyExistsFault: Snapshot with specified name already exists.
+```
+
+**Debugging Commands**:
+```bash
+# List existing snapshots
+aws elasticache describe-snapshots \
+  --query 'Snapshots[?contains(SnapshotName, `kafka-platform-dev`)].[SnapshotName,SnapshotStatus]'
+
+# Delete old snapshot
+aws elasticache delete-snapshot --snapshot-name kafka-platform-dev-ksqldb-redis-final-snapshot
+```
+
+**Solution**: Delete existing snapshot before retry, or modify terraform to skip snapshot creation on destroy.
+
+---
+
+## 11. ROSA Cluster Deletion
+
+### Issue 11.1: ROSA Cluster Uninstall
+
+**Problem**: Need to completely remove ROSA cluster to avoid ongoing charges.
+
+**Commands**:
+```bash
+# List ROSA clusters
+rosa list clusters
+
+# Delete cluster
+rosa delete cluster --cluster=kafka-mq-rosa --yes
+
+# Monitor deletion progress
+rosa logs uninstall -c kafka-mq-rosa --watch
+
+# Verify deletion complete (can take 15-30 minutes)
+rosa list clusters
+```
+
+**Cleanup Verification**:
+```bash
+# Check if cluster is fully removed
+rosa describe cluster -c kafka-mq-rosa
+# Expected: Error: cluster 'kafka-mq-rosa' not found
+
+# Verify no resources remain
+aws ec2 describe-instances \
+  --filters "Name=tag:red-hat-managed,Values=true" \
+  --query 'Reservations[*].Instances[*].[InstanceId,State.Name,Tags[?Key==`Name`].Value|[0]]'
+```
 
 ---
 
